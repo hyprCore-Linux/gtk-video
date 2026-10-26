@@ -1,0 +1,16 @@
+# Cargo
+/target/
+**/*.rs.bk
+
+# Python helpers
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
