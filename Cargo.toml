@@ -2,7 +2,7 @@
 name = "gtk-video"
 version = "0.1.0"
 edition = "2021"
-authors = ["Kevin Hinds <https://github.com/NeuronixOS/GTK-Apps>"]
+authors = ["Kevin Hinds"]
 description = "A GTK4 video trimmer: load a clip, set in/out points, crop/rotate/flip, export the selection"
 license = "GPL-3.0-or-later"
 readme = "README.md"

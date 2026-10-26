@@ -3,7 +3,7 @@
 A GTK4 video trimmer: load a clip, drag in/out handles on the timeline, crop /
 rotate / flip, and export the selected section as a new file.
 
-Created by Kevin Hinds — [github.com/NeuronixOS/GTK-Apps](https://github.com/NeuronixOS/GTK-Apps)
+Created by Kevin Hinds
 
 - Open a file (dialog, CLI args, drag-and-drop)
 - Preview with play / pause, seek, and loop-within-selection
@@ -20,7 +20,7 @@ Created by Kevin Hinds — [github.com/NeuronixOS/GTK-Apps](https://github.com/N
 
 ### Install system dependencies
 
-**Debian / Ubuntu / Neuronix:**
+**Debian / Ubuntu / hyprCore Linux:**
 
 ```bash
 sudo apt install build-essential pkg-config libgtk-4-dev adwaita-icon-theme \

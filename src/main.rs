@@ -179,8 +179,6 @@ fn show_about(app: &gtk::Application) {
             "gtk-video standalone trimmer: load a clip, set in/out points, crop/rotate/flip, and export the selection.",
         )
         .authors(["Created by Kevin Hinds"])
-        .website("https://github.com/NeuronixOS/GTK-Apps")
-        .website_label("github.com/NeuronixOS/GTK-Apps")
         .license_type(gtk::License::Gpl30)
         .build();
     if let Some(win) = app.active_window() {
