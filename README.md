@@ -132,4 +132,5 @@ gtk-video/
 
 ## License
 
-GPL-3.0-or-later
+GNU General Public License v3.0. See [LICENSE](LICENSE).
+
