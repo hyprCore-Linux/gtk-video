@@ -24,7 +24,7 @@ use gtk::prelude::*;
 
 use window::VideoWindow;
 
-const APP_ID: &str = "org.neuronix.GtkVideo";
+const APP_ID: &str = "org.hyprcore.GtkVideo";
 
 fn main() -> glib::ExitCode {
     let app = gtk::Application::builder()
