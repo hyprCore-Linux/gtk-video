@@ -24,7 +24,7 @@ pub struct VideoWindow {
     stack: gtk::Stack,
     timeline: Rc<Timeline>,
     crop: Rc<CropOverlay>,
-    title_label: gtk::Label,
+    reveal_menubar: gtk_theme::RevealMenubar,
     status_label: gtk::Label,
     play_btn: gtk::Button,
     loop_toggle: gtk::CheckButton,
@@ -153,13 +153,22 @@ impl VideoWindow {
         main_box.append(&timeline.area);
         main_box.append(&status_box);
 
-        let title_label = gtk::Label::new(Some("GTK Video"));
-        title_label.add_css_class("title");
-        title_label.set_ellipsize(gtk::pango::EllipsizeMode::Middle);
+        let window = gtk::ApplicationWindow::builder()
+            .application(app)
+            .title("GTK Video")
+            .default_width(cfg.window_width)
+            .default_height(cfg.window_height)
+            .build();
 
         let header = gtk::HeaderBar::new();
-        gtk_theme::prepare_headerbar(&header);
-        header.set_title_widget(Some(&title_label));
+        let (menu_model, menu_icons) = build_menu_model();
+        let reveal_menubar = gtk_theme::install_reveal_menubar(
+            &header,
+            &window,
+            "GTK Video",
+            &menu_model,
+            Some(&menu_icons),
+        );
 
         let open_btn = gtk::Button::from_icon_name("document-open-symbolic");
         open_btn.set_tooltip_text(Some("Open Video (Ctrl+O)"));
@@ -186,21 +195,13 @@ impl VideoWindow {
         crop_btn.set_tooltip_text(Some("Crop (Ctrl+Shift+C)"));
         crop_btn.set_action_name(Some("win.toggle-crop"));
         header.pack_start(&crop_btn);
+        reveal_menubar.pack_controls(&header);
 
         let header_export = gtk::Button::from_icon_name("document-save-as-symbolic");
         header_export.set_tooltip_text(Some("Export (Ctrl+E)"));
         header_export.set_action_name(Some("win.export"));
         header.pack_end(&header_export);
 
-        let menu_button = build_menu_button();
-        header.pack_end(&menu_button);
-
-        let window = gtk::ApplicationWindow::builder()
-            .application(app)
-            .title("GTK Video")
-            .default_width(cfg.window_width)
-            .default_height(cfg.window_height)
-            .build();
         window.set_titlebar(Some(&header));
 
         let vw = Rc::new(Self {
@@ -210,7 +211,7 @@ impl VideoWindow {
             stack,
             timeline,
             crop,
-            title_label,
+            reveal_menubar,
             status_label,
             play_btn,
             loop_toggle,
@@ -294,7 +295,7 @@ impl VideoWindow {
             .file_name()
             .map(|n| n.to_string_lossy().into_owned())
             .unwrap_or_else(|| path.display().to_string());
-        self.title_label.set_text(&name);
+        self.reveal_menubar.set_content_title(&name);
         self.window.set_title(Some(&format!("{name} — GTK Video")));
         *self.path.borrow_mut() = Some(path.to_path_buf());
         *self.media.borrow_mut() = Some(media.clone());
@@ -697,14 +698,14 @@ fn start_playhead_tick(vw: &Rc<VideoWindow>) {
     });
 }
 
-fn build_menu_button() -> gtk::MenuButton {
+fn build_menu_model() -> (gio::Menu, gtk_theme::IconMenu) {
     let mut icons = gtk_theme::IconMenu::new();
     let menu = gio::Menu::new();
 
     let file = gio::Menu::new();
     icons.append_action(&file, "Open…", "win.open");
     icons.append_action(&file, "Export Selection…", "win.export");
-    menu.append_section(None, &file);
+    icons.append_submenu(&menu, "_File", &file, "text-x-generic-symbolic");
 
     let playback = gio::Menu::new();
     icons.append(
@@ -737,7 +738,7 @@ fn build_menu_button() -> gtk::MenuButton {
         "win.mark-out",
         "list-add-symbolic",
     );
-    menu.append_section(None, &playback);
+    icons.append_submenu(&menu, "_Playback", &playback, "media-playback-start-symbolic");
 
     let transform = gio::Menu::new();
     icons.append(
@@ -759,7 +760,7 @@ fn build_menu_button() -> gtk::MenuButton {
         "win.flip-vertical",
         "object-flip-vertical-symbolic",
     );
-    menu.append_section(None, &transform);
+    icons.append_submenu(&menu, "_Transform", &transform, "object-rotate-right-symbolic");
 
     let crop = gio::Menu::new();
     icons.append(
@@ -773,23 +774,18 @@ fn build_menu_button() -> gtk::MenuButton {
     icons.append_action(&crop, "Crop 9:16", "win.crop-9-16");
     icons.append_action(&crop, "Crop 1:1", "win.crop-1-1");
     icons.append_action(&crop, "Crop 4:3", "win.crop-4-3");
-    menu.append_section(None, &crop);
+    icons.append_submenu(&menu, "_Crop", &crop, "edit-select-all-symbolic");
 
     let view = gio::Menu::new();
     gtk_theme::append_profile_menu(&view, "win.theme");
-    menu.append_section(None, &view);
+    icons.append_submenu(&menu, "_View", &view, "view-grid-symbolic");
 
     let help = gio::Menu::new();
     icons.append_action(&help, "Keyboard Shortcuts", "app.shortcuts");
     icons.append_action(&help, "About", "app.about");
-    menu.append_section(None, &help);
+    icons.append_submenu(&menu, "_Help", &help, "help-about-symbolic");
 
-    let button = gtk::MenuButton::new();
-    button.set_icon_name("open-menu-symbolic");
-    button.set_tooltip_text(Some("Menu"));
-    button.set_menu_model(Some(&menu));
-    icons.bind_menu_button(&button);
-    button
+    (menu, icons)
 }
 
 fn install_actions(vw: &Rc<VideoWindow>) {
